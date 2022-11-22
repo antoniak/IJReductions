@@ -13,7 +13,7 @@ make all
 
 ```
 cd src
-./IJReductions
+./PRI
 ```
 
 ## Test
