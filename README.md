@@ -1,4 +1,4 @@
-# IJReductions
+# Point Rectangle Intersection (PRI)
 
 ## Compile
 
