@@ -16,7 +16,6 @@
 #include <functional>
 #include <thread>
 #include <tuple>
-// #include </home/exet4718/postgres/include/libpq-fe.h>
 
 struct Interval {
     int start, end;
