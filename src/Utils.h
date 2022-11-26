@@ -16,6 +16,7 @@
 #include <functional>
 #include <thread>
 #include <tuple>
+// #include </home/exet4718/postgres/include/libpq-fe.h>
 
 struct Interval {
     int start, end;
@@ -26,24 +27,26 @@ inline std::istream& operator>>(std::istream& input, Interval& interval) {
     return input;
 }
 
-namespace constants {
-    static const std::string POINTS = "Points.tbl";
-    static const std::string RECTANGLES = "Rectangles.tbl";
-    static const std::string POINTS_T = "Points_t.tbl";
-    static const std::string RECTANGLES_T = "Rectangles_T.tbl";
-}
-
-namespace types {
-    template<class T> using Tuple = std::tuple<T, T>;
-    template<class T> using Table = std::vector<Tuple<T>>;
-}
-
 namespace utils {
     static bool isDirectory(const char *path) {
         struct stat info;
         if(stat(path, &info) != 0) return false;
         else if(info.st_mode & S_IFDIR) return true;
         else return false;
+    }
+
+    static bool isContainedTo(const Interval *n, const Interval *m) {
+        if ((m->start <= n->start) && (m->end >= n->end)){
+            return true;
+        }
+        return false;
+    }
+
+    static bool intersectsWith(const Interval *n, const Interval *m) {
+        if(((n->start >= m->start) && (n->start <= m->end)) || ((m->start >= n->start) && (m->start <= n->end))) {
+            return true;
+        }
+        return false;
     }
 
     static std::vector<std::string> split_string(std::string input, const char delimiter) {

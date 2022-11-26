@@ -5,8 +5,16 @@
 #include "Utils.h"
 
 using namespace utils;
-using namespace constants;
-using namespace types;
+
+// Constrants 
+static const std::string POINTS = "Points.tbl";
+static const std::string RECTANGLES = "Rectangles.tbl";
+static const std::string POINTS_T = "Points_t.tbl";
+static const std::string RECTANGLES_T = "Rectangles_T.tbl";
+
+// Types
+template<class T> using Tuple = std::tuple<unsigned int, T, T>;
+template<class T> using Table = std::vector<Tuple<T>>;
 
 class PRI {
 
@@ -16,17 +24,17 @@ public:
 
 private:
     int threads;
-    std::string pathToFiles;
-    std::vector<std::tuple<int, int>> Points;
-    std::vector<std::tuple<Interval, Interval>> Rectangles;
-    SegTree *ST_x;
-    SegTree *ST_y;
-    std::vector<std::tuple<int, int , int, int, int, int>> Rectangles_t;
-    std::vector<std::tuple<int, int, int, int>> Points_t;
+    std::string PathToFiles;
+    Table<int> Points;
+    Table<Interval> Rectangles;
+    SegTree *SegmentTree_x;
+    SegTree *SegmentTree_y;
+    std::vector<std::tuple<int, int, int, int, int, int, int>> Rectangles_t;
+    std::vector<std::tuple<int, int, int, int, int>> Points_t;
 
-    void ConstructSegmentTrees();
-    void Reduce();
-    template<class T> void Load(const std::string& path, types::Table<T>& table);
+    // void ConstructSegmentTrees();
+    // void Reduce();
+    template<class T> void ReadTable(const std::string& path, Table<T>& table);
 };
 
 #endif //PRI_H

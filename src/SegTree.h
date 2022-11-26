@@ -3,6 +3,8 @@
 
 #include "Utils.h"
 
+using namespace utils;
+
 class SegTree{
 
 public:
@@ -20,6 +22,7 @@ public:
 private:
 
     void Insert(Interval interval, int node, std::vector<int> &result);
+    Interval GetSegment(int node);
 };
 
 
