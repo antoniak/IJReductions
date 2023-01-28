@@ -5,7 +5,6 @@ file(GLOB_RECURSE SOURCES LIST_DIRECTORIES true *.h *.cpp)
 set(SOURCES ${SOURCES})
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
-# set(CMAKE_CXX_FLAGS "-I/home/exet4718/postgres/include/")
 
 find_package(Threads REQUIRED)
 

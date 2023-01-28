@@ -10,8 +10,13 @@ SegTree::SegTree(std::vector<int> e): elements(e){
     elements.resize(std::distance(elements.begin(), it));
     
     height = ceil(log2(elements.size()));
+    max_node = pow(2, height + 1);
+    
     labels.resize(elements.size());
-    for (int i = 1; i <= elements.size(); i++) { labels[i - 1] =  pow(2, height) - 1 + i; }
+    for (int i = 0; i < elements.size(); i++) { labels[i] = pow(2, height) + i; }
+
+    root_segment.start = pow(2, height);
+    root_segment.end = (2*pow(2, height)) - 1;
 
 }
 
@@ -51,23 +56,29 @@ Interval SegTree::GetSegment(int node) {
  * @param node A node.
  * @param result A vector.
  */
-void SegTree::Insert(Interval interval, int node, std::vector<int> &result) {
+void SegTree::Insert(Interval interval, int node, int x, int y, std::vector<int> &result) {
 
-    if(node >= pow(2, height + 1)) { return; } 
+    if(node >= max_node) { return; } 
 
-    Interval segment = GetSegment(node);
+    Interval segment;
+    segment.start = x;
+    segment.end = y;
 
     if (utils::isContainedTo(&segment, &interval)) { 
         result.push_back(node);
     } else { 
-        Interval lc_segment = GetSegment(node * 2);
-        Interval rc_segment = GetSegment(node * 2 + 1);
+        Interval lc_segment;
+        lc_segment.start = x;
+        lc_segment.end = x + ((y - x) / 2);
+        Interval rc_segment;
+        rc_segment.start = x + ((y - x) / 2) + 1;
+        rc_segment.end = y;
 
         if (intersectsWith(&lc_segment, &interval)) {
-            Insert(interval, node * 2, result);
+            Insert(interval, node * 2, lc_segment.start, lc_segment.end, result);
         }
         if (intersectsWith(&rc_segment, &interval)) {
-            Insert(interval, node * 2 + 1, result);
+            Insert(interval, node * 2 + 1, rc_segment.start, rc_segment.end, result);
         }        
     }
     return;
@@ -80,7 +91,7 @@ std::vector<int> SegTree::CanonicalPartition(Interval interval) {
     inter.start = Query(interval.start);
     inter.end = Query(interval.end);
 
-    Insert(inter, 1, canonical_partition);
+    Insert(inter, 1, root_segment.start, root_segment.end, canonical_partition);
     return canonical_partition;
 
 }

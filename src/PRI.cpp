@@ -1,5 +1,6 @@
 #include "Utils.h"
 #include "PRI.h"
+#include <boost/version.hpp>
 
 PRI::PRI(std::string path): PathToFiles(path) {
 
@@ -45,22 +46,29 @@ for (auto& tuple : Rectangles) {
     }
 }
 
-std::ofstream points_file(PathToFiles + POINTS_T);
-std::stringstream ss;
-for(auto t: Points_t) {
-    ss << std::get<0>(t) << " " << std::get<1>(t) << " " << std::get<2>(t) << " " << std::get<3>(t) << " " << std::get<4>(t) << "\n";        
-}
-points_file << ss.str();
-points_file.close();
-ss.str("");
 
-std::ofstream rectangles_file(PathToFiles + RECTANGLES_T);
-for(auto t: Rectangles_t) {
-    ss << std::get<0>(t) << " " << std::get<1>(t) << " " << std::get<2>(t) << " " << std::get<3>(t) << " " << std::get<4>(t) << " " << std::get<5>(t) << " " << std::get<6>(t)  << "\n";        
-}
-rectangles_file << ss.str();
-rectangles_file.close();
-ss.str("");
+std::cout << "Using Boost "     
+          << BOOST_VERSION / 100000     << "."  // major version
+          << BOOST_VERSION / 100 % 1000 << "."  // minor version
+          << BOOST_VERSION % 100                // patch level
+          << std::endl;
+
+// std::ofstream points_file(PathToFiles + POINTS_T);
+// std::stringstream ss;
+// for(auto t: Points_t) {
+//     ss << std::get<0>(t) << " " << std::get<1>(t) << " " << std::get<2>(t) << " " << std::get<3>(t) << " " << std::get<4>(t) << "\n";        
+// }
+// points_file << ss.str();
+// points_file.close();
+// ss.str("");
+
+// std::ofstream rectangles_file(PathToFiles + RECTANGLES_T);
+// for(auto t: Rectangles_t) {
+//     ss << std::get<0>(t) << " " << std::get<1>(t) << " " << std::get<2>(t) << " " << std::get<3>(t) << " " << std::get<4>(t) << " " << std::get<5>(t) << " " << std::get<6>(t)  << "\n";        
+// }
+// rectangles_file << ss.str();
+// rectangles_file.close();
+// ss.str("");
 }
 
 PRI::~PRI() {}
