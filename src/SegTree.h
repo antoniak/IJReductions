@@ -27,6 +27,4 @@ private:
     Interval GetSegment(int node);
 };
 
-
-
 #endif //SEGTREE_H

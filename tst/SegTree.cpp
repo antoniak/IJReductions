@@ -17,6 +17,10 @@ TEST(SegTree, Query){
 
     EXPECT_EQ(seg_tree.Query(100000), 12);
     EXPECT_EQ(seg_tree.Query(10), 8);
+    EXPECT_EQ(seg_tree.Query(10), 8);
+    EXPECT_EQ(seg_tree.Query(0), 8);
+    EXPECT_EQ(seg_tree.Query(100000000), 0);
+
 }
 
 TEST(SegTree, CanonicalPartition){
