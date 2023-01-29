@@ -8,14 +8,14 @@ template<class T>
 void PRI::ReadTable(const std::string& path, Table<T>& table) {    
     std::ifstream input(path, std::ifstream::in);
     table.clear();
-    int id;
+    int id = 0;
     T elem_0;
     T elem_1;
-    while (input >> id) {
-        input >> elem_0;
+    while (input >> elem_0) {
         input >> elem_1;
         auto tuple = std::make_tuple(id, elem_0, elem_1);
         table.push_back(tuple);
+        id++;
     }
     input.close();
 }
@@ -24,6 +24,8 @@ PRI::PRI(std::string path): PathToFiles(path) {
 
     ReadTable<int>(PathToFiles + POINTS, Points); // Read table with points.
     ReadTable<Interval>(PathToFiles + RECTANGLES, Rectangles); // Read table with rectangles.
+
+    auto start_time = std::chrono::steady_clock::now();
 
     // Construct a segment trees.
     std::vector<int> values_x;
@@ -41,14 +43,14 @@ PRI::PRI(std::string path): PathToFiles(path) {
     SegmentTree_y = new SegTree(values_y); // Segment tree for the intervals in y-axis.
 
     // // Apply the reduction.
-    std::unordered_map<std::pair<int, int>, int, boost::hash<std::pair<int, int>>> hash_table;
+    boost::unordered_map<std::pair<int, int>, int, boost::hash<std::pair<int, int>>> hash_table;
     for (Tuple<int>& tuple : Points) {
         int node_0 = SegmentTree_x->Query(std::get<1>(tuple));
         int node_1 = SegmentTree_y->Query(std::get<2>(tuple));
 
         for (int n_0 = node_0; n_0 > 0; n_0 /= 2) {
             for (int n_1 = node_1; n_1 > 0; n_1 /= 2) {
-                hash_table.insert(std::make_pair(std::make_tuple(n_0, n_1), std::get<0>(tuple)));
+                hash_table.insert(std::make_pair(std::make_pair(n_0, n_1), std::get<0>(tuple)));
             }
         }
     }
@@ -64,17 +66,23 @@ PRI::PRI(std::string path): PathToFiles(path) {
         }
     }
 
+    auto reduction_time = std::chrono::steady_clock::now();
+    std::cerr << "Reduction Time: " << std::chrono::duration_cast<std::chrono::milliseconds>(reduction_time-start_time).count() << " ms\n";
+
     long long count = 0;
     for (auto &tuple: Rectangles_t) {
         auto key = std::make_pair(std::get<0>(tuple), std::get<1>(tuple)); 
         auto range = hash_table.equal_range(key);
+
         for (auto it = range.first; it != range.second; ++it) {
             count++;
-            // std::cout << it->first << ' ' << it->second << '\n';
         }
     }
 
-    // return count;
+    auto join_time = std::chrono::steady_clock::now();
+    std::cerr << "Join Time: " << std::chrono::duration_cast<std::chrono::milliseconds>(join_time-reduction_time).count() << " ms\n";
+
+    std::cout << count << std::endl;
 
 }
 

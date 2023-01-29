@@ -11,10 +11,10 @@ SegTree::SegTree(std::vector<int> e): elements(e){
     
     height = ceil(log2(elements.size()));
     max_node = pow(2, height + 1);
+    
     labels.resize(elements.size());
     for (int i = 0; i < elements.size(); i++) { labels[i] = pow(2, height) + i; }
 
-    Interval root_segment;
     root_segment.start = pow(2, height);
     root_segment.end = (2*pow(2, height)) - 1;
 
@@ -95,5 +95,3 @@ std::vector<int> SegTree::CanonicalPartition(Interval interval) {
     return canonical_partition;
 
 }
-
-
