@@ -3,8 +3,12 @@
 
 #include "SegTree.h"
 #include "Utils.h"
+#include <boost/functional/hash.hpp>
+#include <boost/unordered_map.hpp>
 
 using namespace utils;
+using namespace types;
+
 
 // Constrants 
 static const std::string POINTS = "Points.tbl";
@@ -31,11 +35,11 @@ private:
     SegTree *SegmentTree_y;
     std::vector<std::tuple<int, int, int>> Rectangles_t;
     std::vector<std::tuple<int, int, int, int, int>> Points_t;
-    std::vector<std::string> Points_geom;
-    std::vector<std::string> Polygons_geom;
+    std::vector<types::Point> Points_geom;
+    std::vector<types::MultiPolygon> Polygons_geom;
 
     template<class T> void ReadTable(const std::string& path, Table<T>& table);
-    void ReadGeom(const std::string& path, std::vector<std::string>& table);
+    template<class T> void ReadGeom(const std::string& path, std::vector<T>& table);
 };
 
 #endif //PRI_H

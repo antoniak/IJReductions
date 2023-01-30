@@ -16,6 +16,11 @@
 #include <functional>
 #include <thread>
 #include <tuple>
+#include <boost/geometry/algorithms/intersects.hpp>
+#include <boost/geometry/geometry.hpp>
+#include <boost/geometry/io/wkt/read.hpp>
+#include <boost/geometry/geometries/multi_polygon.hpp>
+#include <boost/geometry/geometries/point_xy.hpp>
 
 struct Interval {
     int start, end;
@@ -59,4 +64,11 @@ namespace utils {
         return elements;
     }
 }
+
+namespace types {    
+    typedef boost::geometry::model::d2::point_xy<double> Point;
+    typedef boost::geometry::model::polygon<Point> Polygon;
+    typedef boost::geometry::model::multi_polygon<Polygon> MultiPolygon;
+}
+
 #endif //UTILS_H

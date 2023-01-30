@@ -1,36 +1,5 @@
 #include "Utils.h"
 #include "PRI.h"
-#include <boost/functional/hash.hpp>
-#include <boost/unordered_map.hpp>
-#include "boost/tuple/tuple.hpp"
-#include <boost/geometry/algorithms/intersects.hpp>
-#include <boost/geometry/geometry.hpp>
-#include <boost/geometry/io/wkt/read.hpp>
-
-namespace bg = boost::geometry;
-
-template<typename T>
-std::vector<std::vector<T>> SplitVector(const std::vector<T>& vec, size_t n)
-{
-    std::vector<std::vector<T>> outVec;
-
-    size_t length = vec.size() / n;
-    size_t remain = vec.size() % n;
-
-    size_t begin = 0;
-    size_t end = 0;
-
-    for (size_t i = 0; i < std::min(n, vec.size()); ++i)
-    {
-        end += (remain > 0) ? (length + !!(remain--)) : length;
-
-        outVec.push_back(std::vector<T>(vec.begin() + begin, vec.begin() + end));
-
-        begin = end;
-    }
-
-    return outVec;
-}
 
 template<class T>
 void PRI::ReadTable(const std::string& path, Table<T>& table) {    
@@ -48,12 +17,16 @@ void PRI::ReadTable(const std::string& path, Table<T>& table) {
     input.close();
 }
 
-void PRI::ReadGeom(const std::string& path, std::vector<std::string>& table) {
+template<class T>
+void PRI::ReadGeom(const std::string& path, std::vector<T>& table) {
     std::ifstream input(path, std::ifstream::in);
-
+    T object;
     table.clear();
     for(std::string line; getline(input, line);){
-        table.push_back(line);
+        boost::erase_all(line, "\\");
+        boost::geometry::read_wkt(line, object);
+        boost::geometry::correct(object);
+        table.push_back(object);
     }
     input.close();
 }
@@ -63,8 +36,8 @@ PRI::PRI(std::string path): PathToFiles(path) {
 
     ReadTable<int>(PathToFiles + POINTS, Points); // Read table with points.
     ReadTable<Interval>(PathToFiles + RECTANGLES, Rectangles); // Read table with rectangles.
-    ReadGeom(PathToFiles + POINTS_GEOM, Points_geom); 
-    ReadGeom(PathToFiles + POLYGONS_GEOM, Polygons_geom); 
+    ReadGeom<types::Point>(PathToFiles + POINTS_GEOM, Points_geom); 
+    ReadGeom<types::MultiPolygon>(PathToFiles + POLYGONS_GEOM, Polygons_geom); 
 
     auto start_time = std::chrono::steady_clock::now();
 
@@ -97,7 +70,7 @@ PRI::PRI(std::string path): PathToFiles(path) {
     auto reduction_time = std::chrono::steady_clock::now();
     std::cerr << "Reduction Time: " << std::chrono::duration_cast<std::chrono::milliseconds>(reduction_time-start_time).count() << " ms\n";
 
-    // // Apply the reduction.
+    // Apply the reduction.
     boost::unordered_map<std::pair<int, int>, int, boost::hash<std::pair<int, int>>> hash_table;
     for (Tuple<int>& tuple : Points) {
         int node_0 = SegmentTree_x->Query(std::get<1>(tuple));
@@ -113,25 +86,22 @@ PRI::PRI(std::string path): PathToFiles(path) {
     auto hash_time = std::chrono::steady_clock::now();
     std::cerr << "Hash Table Construction Time: " << std::chrono::duration_cast<std::chrono::milliseconds>(hash_time-reduction_time).count() << " ms\n";
 
-    typedef bg::model::point<double, 2, bg::cs::cartesian> Point;
-    Point point;
-    bg::model::ring<Point> polygon;
-
     long long count = 0;
     for (auto &tuple: Rectangles_t) {
         auto key = std::make_pair(std::get<0>(tuple), std::get<1>(tuple)); 
         auto range = hash_table.equal_range(key);
 
         for (auto it = range.first; it != range.second; ++it) {
-            bg::read_wkt(Points_geom[it->second], point);
-            bg::read_wkt("POLYGON((2 1.3,2.4 1.7,2.8 1.8,3.4 1.2,3.7 1.6,3.4 2,4.1 3,5.3 2.6,5.4 1.2,4.9 0.8,2.9 0.7,2 1.3))", polygon);
-            bg::intersects(point, polygon);
-            count++;
+            if(boost::geometry::within(Points_geom[it->second], Polygons_geom[std::get<2>(tuple)])) {
+                count++;
+            }
         }
     }
 
+    std::cout << "Result: " << count << std::endl;
+
     auto join_time = std::chrono::steady_clock::now();
-    std::cerr << "Join Time: " << std::chrono::duration_cast<std::chrono::milliseconds>(join_time-reduction_time).count() << " ms\n";
+    std::cerr << "Join Time: " << std::chrono::duration_cast<std::chrono::milliseconds>(join_time-hash_time).count() << " ms\n";
 }
 
 PRI::~PRI() {}
